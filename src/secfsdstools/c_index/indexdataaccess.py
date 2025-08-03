@@ -2,6 +2,7 @@
 
 import sqlite3
 from dataclasses import dataclass
+from datetime import datetime
 from typing import List, Optional
 
 import pandas as pd
@@ -130,6 +131,27 @@ class ParquetDBIndexingAccessor(DB):
 
         sql = f"SELECT * FROM {self.index_processing_table} WHERE fileName in ({filenames_str})"
         return self.execute_fetchall_typed(sql, IndexFileProcessingState)
+
+    def find_oldest_daily_processing_time(self) -> Optional[datetime]:
+        """
+        Finds the oldest processing time of all daily files.
+        Returns:
+            datetime: the oldest processing time as datetime object, or None if no daily files found
+        """
+
+        # Use the original processTime to preserve full precision
+        sql = f"""SELECT processTime FROM {self.index_processing_table}
+                  WHERE fileName GLOB '[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].zip'
+                  ORDER BY DATETIME(processTime) ASC
+                  LIMIT 1"""
+        result = self.execute_fetchall(sql)
+
+        if not result or result[0][0] is None:
+            return None
+
+        # Parse the ISO 8601 timestamp string to datetime object
+        timestamp_str = result[0][0]
+        return datetime.fromisoformat(timestamp_str)
 
     def insert_indexreport(self, data: IndexReport):
         """

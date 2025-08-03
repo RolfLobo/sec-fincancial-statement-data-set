@@ -164,3 +164,18 @@ benötigt neuerey python version (probleme mit conda install und python 3.7)
 - jupyter labextension install @jupyter-widgets/jupyterlab-manager
 - pip install secfsdstools
 - pip install ipywidgets
+
+
+Notes Daily Cleanup Prozess
+---------------------------
+2 Szenerian, die beachtet werden müssen
+1. es ist ein neues quarterfile vorhanden
+   -> keine Daily Daten mit Quartern, die vor der letzten "quarterly" Verarbeitung liegt
+2. daily Verarbeitung ist nicht mehr kompatibel mit der vorherigen Version
+   -> geht quasi nur mit über den Timestamp... 
+   -> ältester folder daily-verarbeitung dar nicht nach den zusätzlichen daily prozessschritten sein
+      -> bzw. processtime des daily zip file muss vor folder time liegen.
+      -> es darf kein daily custom process folder geben, dessen timestamp vor dem 
+         daily.zip verarbeitungszeitpunkt liegt.
+       => das wäre dann ein Hinweis, dass ales gelöscht werden muss
+  

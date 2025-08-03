@@ -29,8 +29,13 @@ new release
    [x] tests for ConcatMultiRootByChangedTimestampProcess
 
 [] clearing of daily data processed 
-   [x] new step in the automation pipeline
+   [] new step in the automation pipeline
+   [] get oldest daily processtime in index_file_processing_state table
+   [] get oldest directory in daily processing (filter/join & standardize)
+   [] check if there is an oldest directory timestamp that is before oldest daily processing time
+      -> if so, adapt quarterly cut off day appropriately -> ensure everything is cleaned ->
    [] tests
+    
 
 [x] add new notebook for daily automation
 [] adapt readme, changelog, notebooks (daily processing)

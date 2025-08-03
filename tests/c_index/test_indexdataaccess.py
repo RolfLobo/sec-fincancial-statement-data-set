@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List
 
 import pandas as pd
@@ -373,3 +374,116 @@ def test_debug_clear_index_tables(parquetindexaccessor):
     assert remaining_reports[0].adsh == "keep"
     assert len(remaining_processing) == 1
     assert remaining_processing[0].fileName == "20220401.zip"
+
+
+def test_find_oldest_daily_processing_time_with_daily_files(parquetindexaccessor):
+    """Test finding oldest processing time when daily files exist."""
+    # Setup - Create daily processing states with different processing times
+    daily_processing_states = [
+        IndexFileProcessingState(
+            fileName="20220301.zip",
+            status="processed",
+            processTime="2022-03-01T10:00:00.123456+01:00",
+            fullPath="/path1",
+            entries=10,
+        ),
+        IndexFileProcessingState(
+            fileName="20220201.zip",
+            status="processed",
+            processTime="2022-02-01T08:30:00.654321+01:00",
+            fullPath="/path2",
+            entries=15,
+        ),
+        IndexFileProcessingState(
+            fileName="20220401.zip",
+            status="processed",
+            processTime="2022-04-01T14:15:00.987654+01:00",
+            fullPath="/path3",
+            entries=20,
+        ),
+    ]
+
+    # Also add a quarterly file that should be ignored
+    quarterly_processing = IndexFileProcessingState(
+        fileName="2022q1.zip",
+        status="processed",
+        processTime="2022-01-01T06:00:00.111111+01:00",  # Earlier than daily files but should be ignored
+        fullPath="/path4",
+        entries=100,
+    )
+
+    # Insert all test data
+    for processing in daily_processing_states:
+        parquetindexaccessor.insert_indexfileprocessing(data=processing)
+    parquetindexaccessor.insert_indexfileprocessing(data=quarterly_processing)
+
+    # Execution
+    oldest_time = parquetindexaccessor.find_oldest_daily_processing_time()
+
+    # Assertion - Should return the oldest daily processing time (ignoring quarterly)
+    expected_time = datetime.fromisoformat("2022-02-01T08:30:00.654321+01:00")
+    assert oldest_time == expected_time
+
+
+def test_find_oldest_daily_processing_time_no_daily_files(parquetindexaccessor):
+    """Test finding oldest processing time when no daily files exist."""
+    # Setup - Create only quarterly processing states
+    quarterly_processing_states = [
+        IndexFileProcessingState(
+            fileName="2022q1.zip",
+            status="processed",
+            processTime="2022-01-01T10:00:00.222222+01:00",
+            fullPath="/path1",
+            entries=100,
+        ),
+        IndexFileProcessingState(
+            fileName="2022q2.zip",
+            status="processed",
+            processTime="2022-04-01T10:00:00.333333+01:00",
+            fullPath="/path2",
+            entries=150,
+        ),
+    ]
+
+    # Insert test data
+    for processing in quarterly_processing_states:
+        parquetindexaccessor.insert_indexfileprocessing(data=processing)
+
+    # Execution
+    oldest_time = parquetindexaccessor.find_oldest_daily_processing_time()
+
+    # Assertion - Should return None when no daily files exist
+    assert oldest_time is None
+
+
+def test_find_oldest_daily_processing_time_empty_database(parquetindexaccessor):
+    """Test finding oldest processing time when database is empty."""
+    # Setup - Verify database is empty
+    assert len(parquetindexaccessor.read_all_indexfileprocessing()) == 0
+
+    # Execution
+    oldest_time = parquetindexaccessor.find_oldest_daily_processing_time()
+
+    # Assertion - Should return None when database is empty
+    assert oldest_time is None
+
+
+def test_find_oldest_daily_processing_time_single_daily_file(parquetindexaccessor):
+    """Test finding oldest processing time with only one daily file."""
+    # Setup - Create single daily processing state
+    processing = IndexFileProcessingState(
+        fileName="20220315.zip",
+        status="processed",
+        processTime="2022-03-15T12:45:30.444444+01:00",
+        fullPath="/path1",
+        entries=25,
+    )
+
+    parquetindexaccessor.insert_indexfileprocessing(data=processing)
+
+    # Execution
+    oldest_time = parquetindexaccessor.find_oldest_daily_processing_time()
+
+    # Assertion - Should return the single daily processing time
+    expected_time = datetime.fromisoformat("2022-03-15T12:45:30.444444+01:00")
+    assert oldest_time == expected_time
