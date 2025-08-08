@@ -28,23 +28,18 @@ new release
    [x] get_latest_mtime takes a list of rootpaths, not just one + tests
    [x] tests for ConcatMultiRootByChangedTimestampProcess
 
-[] clearing of daily data processed 
-   [] new step in the automation pipeline
-   [] context for process step
+[x] clearing of daily data processed 
+   [x] new step in the automation pipeline
+   [x] context for process step
       -> store cut_off_day in context during DailyPreparationProcess
       -> use cut_off_day in ClearDailyDataProcess
 
-   [] get oldest daily processtime in index_file_processing_state table
-   [] get oldest directory in daily processing (filter/join)
-   [] check if there is an oldest directory timestamp that is before oldest daily processing time
-      -> if so, adapt quarterly cut off day appropriately -> ensure everything is cleaned ->
-   [] tests
     
 
 [x] add new notebook for daily automation
 [] adapt readme, changelog, notebooks (daily processing)
-  [] readme
-  [] changelog
+  [x] readme
+  [x] changelog
   [x] notebook 10_00
 
 
