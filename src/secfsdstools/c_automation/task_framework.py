@@ -411,6 +411,13 @@ class AbstractProcess(ABC):
     Defines the Abstract process of processing tasks for a certain process.
     """
 
+    def __init__(self):
+        self.context: Dict[str, Any]
+
+    def set_context(self, context: Dict[str, Any]):
+        """set the context of the process."""
+        self.context = context
+
     @abstractmethod
     def process(self):
         """executes the process."""
@@ -424,6 +431,7 @@ class AbstractParallelProcess(AbstractProcess):
     def __init__(
         self, execute_serial: bool = False, chunksize: int = 3, paralleltasks: int = 3, max_tasks_per_second: int = 8
     ):
+        super().__init__()
         self.execute_serial = execute_serial
         self.chunksize = chunksize
         self.paralleltasks = paralleltasks
@@ -547,7 +555,9 @@ def execute_processes(processes: List[AbstractProcess]):
         processes (List(AbstractProcess)): List of AbstractProcesses to be executed
 
     """
+    context: Dict[str, Any] = {}
     for process in processes:
+        process.set_context(context)
         process.process()
 
 

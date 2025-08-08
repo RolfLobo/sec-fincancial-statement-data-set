@@ -135,8 +135,6 @@ from typing import List
 
 from secfsdstools.a_config.configmodel import Configuration
 from secfsdstools.c_automation.task_framework import AbstractProcess, LoggingProcess
-from secfsdstools.c_daily.dailypreparation_process import DailyPreparationProcess
-from secfsdstools.c_index.indexdataaccess import ParquetDBIndexingAccessor
 from secfsdstools.g_pipelines.concat_process import (
     ConcatByChangedTimestampProcess,
     ConcatByNewSubfoldersProcess,
@@ -158,19 +156,16 @@ class ClearDailyDataProcess(AbstractProcess):
     Hence, we only need to clean the filtered and standardized daily data.
     """
 
-    def __init__(self, db_dir: str, filtered_daily_joined_by_stmt_dir: str, standardized_daily_by_stmt_dir: str):
+    def __init__(self, filtered_daily_joined_by_stmt_dir: str, standardized_daily_by_stmt_dir: str):
         """
         Constructor.
         Args:
-            db_dir: directory of the database
             filtered_daily_joined_by_stmt_dir: directory containing the filtered daily data
             standardized_daily_by_stmt_dir: directory containing the standardized daily data
         """
         super().__init__()
-        self.db_dir = db_dir
-        self.index_accessor = ParquetDBIndexingAccessor(db_dir=db_dir)
-        self.filtered_daily_joined_by_stmt_dir = filtered_daily_joined_by_stmt_dir
-        self.standardized_daily_by_stmt_dir = standardized_daily_by_stmt_dir
+        self.filtered_daily_joined_by_stmt_path = Path(filtered_daily_joined_by_stmt_dir) / "daily"
+        self.standardized_daily_by_stmt_path = Path(standardized_daily_by_stmt_dir)
 
     def clear_directory(self, cut_off_day: int, root_dir_path: Path):
         """
@@ -188,20 +183,12 @@ class ClearDailyDataProcess(AbstractProcess):
         """
         Execute the process.
         """
-        last_processed_quarter_file_name = self.index_accessor.find_latest_quarter_file_name()
-        if last_processed_quarter_file_name is None:
-            raise ValueError(
-                "No quarterly files were processed before. "
-                "Please process quarterly files first before running the daily process."
-            )
-        last_processed_quarter = last_processed_quarter_file_name.split(".")[0]
+        # DailyPreparationProcess writes the calculated cut_off_day into the context
+        # and we have to make sure, that we cleanup the "postprocessing" daily data as well.
+        cut_off_day = self.context["cut_off_day"]
 
-        daily_start_quarter = DailyPreparationProcess.calculate_daily_start_quarter(last_processed_quarter)
-        cut_off_day = DailyPreparationProcess.cut_off_day(daily_start_quarter)
-        self.clear_directory(
-            cut_off_day=cut_off_day, root_dir_path=Path(self.filtered_daily_joined_by_stmt_dir) / "daily"
-        )
-        self.clear_directory(cut_off_day=cut_off_day, root_dir_path=Path(self.standardized_daily_by_stmt_dir))
+        self.clear_directory(cut_off_day=cut_off_day, root_dir_path=self.filtered_daily_joined_by_stmt_path)
+        self.clear_directory(cut_off_day=cut_off_day, root_dir_path=self.standardized_daily_by_stmt_path)
 
 
 # pylint: disable=too-many-locals
@@ -367,7 +354,6 @@ def define_extra_processes(configuration: Configuration) -> List[AbstractProcess
     # clean daily data covered now by quarterly data
     processes.append(
         ClearDailyDataProcess(
-            db_dir=configuration.db_dir,
             filtered_daily_joined_by_stmt_dir=filtered_daily_joined_by_stmt_dir,
             standardized_daily_by_stmt_dir=standardized_daily_by_stmt_dir,
         )

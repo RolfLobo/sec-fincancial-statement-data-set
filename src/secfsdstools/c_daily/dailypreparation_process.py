@@ -168,6 +168,7 @@ class DailyPreparationProcess(AbstractProcess):
 
         daily_start_quarter = self.calculate_daily_start_quarter(daily_last_processed_quarter)
         cut_off_day = self.cut_off_day(daily_start_quarter)
+        self.context["cut_off_day"] = cut_off_day
 
         LOGGER.info("clearing daily index tables and daily parquet files before cut off: %s", cut_off_day)
         self.clear_index_tables(cut_off_day=cut_off_day)
