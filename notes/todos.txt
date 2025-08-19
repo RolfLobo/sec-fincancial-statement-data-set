@@ -16,35 +16,6 @@ new release
 - on github -> under code releases: draft new release
 
 
-2.4.2
------
-[x] support daily data in example automation pipelines
-[x] test results -> are "all" folders the sum of quarter and daily?
-[x] Logging Process to better show what is going on
-[x] supporting multiple root_paths for concat
-   [x] base class takes a list of rootpaths, not just one
-      filter are aplied on all rootpaths elements
-      -> final list of paths to process
-   [x] get_latest_mtime takes a list of rootpaths, not just one + tests
-   [x] tests for ConcatMultiRootByChangedTimestampProcess
-
-[x] clearing of daily data processed 
-   [x] new step in the automation pipeline
-   [x] context for process step
-      -> store cut_off_day in context during DailyPreparationProcess
-      -> use cut_off_day in ClearDailyDataProcess
-
-    
-
-[x] add new notebook for daily automation
-[] adapt readme, changelog, notebooks (daily processing)
-  [x] readme
-  [x] changelog
-  [x] notebook 10_00
-
-
-
-
 
 
 
@@ -152,7 +123,34 @@ look at
 
 
 History
--------
+=======
+
+2.4.2
+-----
+[x] support daily data in example automation pipelines
+[x] test results -> are "all" folders the sum of quarter and daily?
+[x] Logging Process to better show what is going on
+[x] supporting multiple root_paths for concat
+   [x] base class takes a list of rootpaths, not just one
+      filter are aplied on all rootpaths elements
+      -> final list of paths to process
+   [x] get_latest_mtime takes a list of rootpaths, not just one + tests
+   [x] tests for ConcatMultiRootByChangedTimestampProcess
+
+[x] clearing of daily data processed 
+   [x] new step in the automation pipeline
+   [x] context for process step
+      -> store cut_off_day in context during DailyPreparationProcess
+      -> use cut_off_day in ClearDailyDataProcess
+    
+[x] add new notebook for daily automation
+[x] adapt readme, changelog, notebooks (daily processing)
+  [x] readme
+  [x] changelog
+  [x] notebook 10_00
+
+
+
 2.4.1
 -----
 [x] update secdaily to 0.2.2 (more robustness / prevent name clashes)
