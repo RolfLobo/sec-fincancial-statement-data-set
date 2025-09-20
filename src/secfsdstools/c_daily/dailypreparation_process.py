@@ -109,6 +109,13 @@ class DailyPreparationProcess(AbstractProcess):
         """
 
         state_access = StateAccess(work_dir=self.daily_dir)
+
+        # check if daily was already executed before
+        last_run_version = state_access.get_last_run_version()
+        if last_run_version is None:
+            # daily was not executed yet, so no data to clean up
+            return False
+
         migration_processor = MigrationProcessor(dbmanager=state_access)
 
         if migration_processor.is_migration_required():

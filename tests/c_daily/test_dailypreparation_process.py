@@ -134,3 +134,15 @@ def test_clear_daily_parquet_files_directory_not_exists():
 
         # Assertion - method should complete without error
         # No specific assertions needed as we're testing it doesn't crash
+
+
+def test_noneexistent_daily_dir(tmp_path):
+    """Test the correct execution of the migration check, if daily has not
+    yet been executed. Meaning, no daily db is present."""
+
+    preparation = DailyPreparationProcess(
+        db_dir=str(tmp_path / "db"), parquet_dir=str(tmp_path / "parquet"), daily_dir=str(tmp_path / "daily")
+    )
+
+    # ensure no Exception was thrown
+    assert preparation.check_for_daily_cleanup() is False
